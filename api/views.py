@@ -1,6 +1,6 @@
 # TODO:  Напишите свой вариант
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, viewsets, permissions, filters
+from rest_framework import generics, viewsets, mixins, permissions, filters
 from .models import Follow, Group, Post, Comment
 from .serializers import PostSerializer, CommentSerializer, GroupSerializer, FollowSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -14,7 +14,7 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwner]
     authentication_classes = [JWTAuthentication]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['group',]
+    filterset_fields = ['group', ]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -37,21 +37,24 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class APIGroup(generics.ListCreateAPIView):
+class APIGroup(mixins.ListModelMixin,
+               mixins.CreateModelMixin,
+               viewsets.GenericViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [IsOwner,]
+    permission_classes = [IsOwner, ]
     authentication_classes = [JWTAuthentication]
 
 
-class APIFollow(generics.ListCreateAPIView):
+class APIFollow(mixins.ListModelMixin,
+                mixins.CreateModelMixin,
+                viewsets.GenericViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     authentication_classes = [JWTAuthentication]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['user',]
-    search_fields = ['user__username','following__username']
-
+    filterset_fields = ['user', ]
+    search_fields = ['user__username', 'following__username']
 
     def get_queryset(self):
         user = self.request.user

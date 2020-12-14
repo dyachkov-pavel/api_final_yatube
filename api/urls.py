@@ -8,12 +8,14 @@ from rest_framework_simplejwt.views import (
 
 router_posts_v1 = DefaultRouter()
 router_posts_v1.register('posts', PostViewSet, basename='post-list')
-router_posts_v1.register(r'posts/(?P<post_id>.+)/comments', CommentViewSet, basename='comment-list')
+router_posts_v1.register(r'posts/(?P<post_id>.+)/comments', 
+                         CommentViewSet, 
+                         basename='comment-list')
+router_posts_v1.register('group', APIGroup, basename='group-list')
+router_posts_v1.register('follow', APIFollow, basename='follow-list')
 
 urlpatterns = [
     path('v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('v1/', include(router_posts_v1.urls)),
-    path('v1/group/', APIGroup.as_view()),
-    path('v1/follow/', APIFollow.as_view()),
 ]
